@@ -1,4 +1,3 @@
-[index.html](https://github.com/user-attachments/files/23841501/index.html)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,12 +7,24 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Hide scrollbar for cleaner look */
+        /* Custom scrollbar hiding */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Dark mode overrides based on Telegram theme */
+        body.dark { background-color: #18181b; color: #e4e4e7; }
+        .dark .bg-white { background-color: #27272a; }
+        .dark .text-gray-800 { color: #e4e4e7; }
+        .dark .text-gray-700 { color: #d4d4d8; }
+        .dark .text-gray-500 { color: #a1a1aa; }
+        .dark .border-gray-200 { border-color: #3f3f46; }
+        .dark .bg-gray-50 { background-color: #18181b; }
+        .dark input, .dark select { background-color: #3f3f46; border-color: #52525b; color: white; }
+        .dark input::placeholder { color: #a1a1aa; }
+        .dark .shadow-sm { box-shadow: none; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 pb-24 select-none font-sans">
+<body class="bg-gray-50 text-gray-800 pb-24 select-none font-sans transition-colors duration-200">
 
     <!-- Header -->
     <div class="bg-white p-4 sticky top-0 shadow-sm z-50 border-b border-gray-200">
@@ -27,7 +38,7 @@
         <!-- SR NO -->
         <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200">
             <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">SR Number(s)</label>
-            <input type="text" id="sr_no" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all" placeholder="e.g. 12345, 67890">
+            <input type="text" id="sr_no" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="e.g. 12345, 67890">
         </div>
 
         <!-- RFO 1 -->
@@ -93,12 +104,25 @@
     </form>
 
     <script>
-        // Initialize Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Request full screen
+        tg.expand(); 
+
+        // --- DARK MODE LOGIC ---
+        // Check if Telegram is in Dark Mode
+        if (tg.colorScheme === 'dark') {
+            document.body.classList.add('dark');
+        }
+
+        // Listen for theme changes
+        tg.onEvent('themeChanged', function() {
+            if (tg.colorScheme === 'dark') {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+            }
+        });
 
         // --- DATA CONFIGURATION ---
-        // (Must match Python Backend Data)
         const DATA = {
             RFO1: [
                 "FAT_OTB_related", "Fiber_cut_OH_cable_restored", "Fiber_cut_UG_cable_restored",
@@ -166,11 +190,12 @@
         const matContainer = document.getElementById("materialsList");
         MATERIALS_LIST.forEach((mat, idx) => {
             const div = document.createElement("div");
-            div.className = "flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-white hover:shadow-sm transition-all";
+            // Added dark mode classes for material items
+            div.className = "flex items-center gap-3 p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 hover:shadow-sm transition-all";
             div.innerHTML = `
                 <input type="checkbox" id="chk_${idx}" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer" onchange="toggleQty(${idx})">
-                <label for="chk_${idx}" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer select-none">${mat}</label>
-                <input type="number" id="qty_${idx}" class="hidden w-20 p-2 text-sm text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Qty" min="1">
+                <label for="chk_${idx}" class="flex-1 text-sm font-medium text-gray-700 dark:text-gray-200 cursor-pointer select-none">${mat}</label>
+                <input type="number" id="qty_${idx}" class="hidden w-20 p-2 text-sm text-center border border-gray-300 dark:border-zinc-600 rounded-md focus:ring-2 focus:ring-blue-500 outline-none dark:bg-zinc-700 dark:text-white" placeholder="Qty" min="1">
             `;
             matContainer.appendChild(div);
         });
